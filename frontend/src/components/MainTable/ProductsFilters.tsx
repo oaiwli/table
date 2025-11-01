@@ -39,7 +39,7 @@ export const ProductsFilters: React.FC<ProductsFiltersProps> = ({
       <Select
         placeholder="Статус"
         allowClear
-        value={filters.status}
+        value={filters.status || undefined}
         onChange={(value) => onChange({ status: value })}
         style={{ width: 150 }}
       >

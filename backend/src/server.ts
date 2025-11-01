@@ -59,13 +59,11 @@ const clearExistingData = async (): Promise<void> => {
   }
 };
 
-// функция для вставки тестовых данных
 const insertSampleData = async (): Promise<void> => {
   try {
-    // проверяем, есть ли уже данные в таблице сканирований
     const result = await pool.query("SELECT COUNT(*) FROM scans");
     if (parseInt(result.rows[0].count) === 0) {
-      // вставляем тестовые продукты и получаем их ID
+      // вставляем тестовые продукты (всего 16)
       const productsResult = await pool.query(`
         INSERT INTO products (name) VALUES 
         ('хачапури с сыром'),
@@ -75,25 +73,41 @@ const insertSampleData = async (): Promise<void> => {
         ('палпи'),
         ('кокакола'),
         ('пепси'),
-        ('23456')
+        ('23456'),
+        ('сок вкусный'),
+        ('сок невкусный'),
+        ('вода'),
+        ('сникерс'),
+        ('марс'),
+        ('чипсы'),
+        ('орешки'),
+        ('молоко')
         RETURNING id
       `);
 
       const productIds = productsResult.rows.map((row) => row.id);
 
-      // вставляем тестовые сканирования
+      // вставляем тестовые сканирования (16 строк)
       await pool.query(
         `
         INSERT INTO scans (ip, status, product_id) VALUES 
-        ('192.167.1.1', 'active', $1),
-        ('192.167.1.2', 'inactive', $1),
-        ('192.167.1.3', 'active', $2),
-        ('192.168.1.1', 'active', $3),
-        ('192.168.1.2', 'active', $4),
-        ('192.168.1.3', 'inactive', $5),
-        ('192.168.1.4', 'inactive', $6),
-        ('192.168.1.5', 'inactive', $7),
-        ('192.168.1.6', 'inactive', $8)
+  ('192.167.1.1', 'active', $1),
+  ('192.167.1.2', 'inactive', $1),
+  ('192.167.1.3', 'active', $2),
+  ('192.168.1.1', 'active', $3),
+  ('192.168.1.2', 'active', $4),
+  ('192.168.1.3', 'inactive', $5),
+  ('192.168.1.4', 'inactive', $6),
+  ('192.168.1.5', 'inactive', $7),
+  ('192.168.1.6', 'inactive', $8),
+  ('192.168.2.1', 'active', $9),
+  ('192.168.2.2', 'inactive', $10),
+  ('192.168.2.3', 'active', $11),
+  ('192.168.2.4', 'inactive', $12),
+  ('192.168.2.5', 'active', $13),
+  ('192.168.3.1', 'inactive', $14),
+  ('192.168.3.2', 'active', $15),
+  ('192.168.3.3', 'inactive', $16)
       `,
         productIds
       );
