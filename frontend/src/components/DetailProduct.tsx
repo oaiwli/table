@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Card, Descriptions, Tag, Space } from "antd";
+import { Button, Card, Descriptions, Tag, Space, Spin, Result } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { productsApi } from "../api/productsApi";
@@ -20,37 +20,71 @@ export const DetailProduct: React.FC = () => {
     enabled: !!productId,
   });
 
-  if (error) {
+  // --- Загрузка ---
+  if (isLoading) {
     return (
-      <Card>
-        <div>Ошибка при загрузке данных продукта</div>
-        <Button onClick={() => navigate("/")}>Вернуться к списку</Button>
-      </Card>
+      <div
+        style={{
+          display: "flex",
+          height: "80vh",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        <Spin size="large" />
+        <div style={{ marginTop: 16, color: "#888" }}>Загрузка данных...</div>
+      </div>
     );
   }
 
-  if (isLoading) {
-    return <div>Загрузка...</div>;
+  if (error) {
+    return (
+      <Result
+        status="error"
+        title="Ошибка при загрузке данных продукта"
+        subTitle="Попробуйте обновить страницу или вернуться к списку."
+        extra={[
+          <Button type="primary" key="back" onClick={() => navigate("/")}>
+            Вернуться к списку
+          </Button>,
+        ]}
+      />
+    );
   }
 
   if (!product) {
     return (
-      <Card>
-        <div>Продукт не найден</div>
-        <Button onClick={() => navigate("/")}>Вернуться к списку</Button>
-      </Card>
+      <Result
+        status="404"
+        title="Продукт не найден"
+        subTitle="Похоже, такого продукта не существует."
+        extra={[
+          <Button type="primary" key="home" onClick={() => navigate("/")}>
+            Вернуться к списку
+          </Button>,
+        ]}
+      />
     );
   }
 
   return (
     <div style={{ padding: 24 }}>
       <Space direction="vertical" style={{ width: "100%" }} size="large">
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")}>
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate("/")}
+          style={{ alignSelf: "flex-start" }}
+        >
           Назад к списку
         </Button>
 
-        <Card title={`Детали продукта #${product.id}`}>
-          <Descriptions bordered column={1}>
+        <Card
+          title={`Детали продукта #${product.id}`}
+          bordered
+          style={{ borderRadius: 12 }}
+        >
+          <Descriptions bordered column={1} size="middle">
             <Descriptions.Item label="IP Адрес">
               <strong>{product.ip}</strong>
             </Descriptions.Item>
