@@ -10,7 +10,7 @@ import { ProductsTable } from "./ProductsTable";
 
 export const MainTable: React.FC = observer(() => {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [filters, setFilters] = useState({ ip: "", status: "" });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
