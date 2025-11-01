@@ -71,6 +71,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
         <Popconfirm
           title="Удалить продукт?"
           onConfirm={() => onDelete(record.id)}
+          okText="Да"
+          cancelText="Отмена"
         >
           <Button danger size="small" icon={<DeleteOutlined />}>
             Удалить
@@ -99,6 +101,16 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({
         showSizeChanger: true,
         onChange: onPageChange,
       }}
+      onRow={(record) => ({
+        onClick: (e) => {
+          // решаем конфликт если клик по кнопке удаления
+          const isButton = (e.target as HTMLElement).closest(
+            "button, a, span[role='button']"
+          );
+          if (!isButton) navigateTo(record.id);
+        },
+        style: { cursor: "pointer" },
+      })}
     />
   );
 };
