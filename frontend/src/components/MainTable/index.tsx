@@ -40,6 +40,7 @@ export const MainTable: React.FC = observer(() => {
     onSuccess: () => {
       message.success("Сканирование удалено");
       queryClient.invalidateQueries({ queryKey: ["scans"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
@@ -49,6 +50,7 @@ export const MainTable: React.FC = observer(() => {
       message.success("Выбранные сканирования удалены");
       selectedProductsStore.clearAll();
       queryClient.invalidateQueries({ queryKey: ["scans"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
@@ -162,7 +164,7 @@ export const MainTable: React.FC = observer(() => {
         </Title>
 
         <Table
-          dataSource={productsData || []}
+          dataSource={productsData?.sort((a: any, b: any) => a.id - b.id) || []}
           columns={productColumns}
           loading={isProductsLoading}
           size="small"

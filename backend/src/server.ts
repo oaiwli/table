@@ -206,27 +206,39 @@ app.get("/api/scans/:id", async (req, res) => {
   }
 });
 
-// удалить 1 сканирование
+// удалить 1 сканирование + связанный продукт
 app.delete("/api/scans/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
-    const result = await pool.query<Scan>(
-      "DELETE FROM scans WHERE id = $1 RETURNING *",
+    const scanResult = await pool.query(
+      "SELECT product_id FROM scans WHERE id = $1",
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (scanResult.rows.length === 0) {
       return res.status(404).json({ error: "Сканирование не найдено" });
     }
 
-    res.json({ success: true, deleted: result.rows[0] });
+    const productId = scanResult.rows[0].product_id;
+
+    await pool.query("DELETE FROM scans WHERE id = $1", [id]);
+
+    if (productId) {
+      await pool.query("DELETE FROM products WHERE id = $1", [productId]);
+    }
+
+    res.json({
+      success: true,
+      message: "Сканирование и связанный продукт удалены",
+    });
   } catch (err) {
     console.error("Ошибка при удалении сканирования:", err);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   }
 });
 
-// удалить несколько сканирований
+// удалить несколько сканирований + их продукты
 app.delete("/api/scans", async (req, res) => {
   const { ids } = req.body;
 
@@ -235,14 +247,29 @@ app.delete("/api/scans", async (req, res) => {
   }
 
   try {
-    const result = await pool.query<Scan>(
+    const scansResult = await pool.query(
+      "SELECT DISTINCT product_id FROM scans WHERE id = ANY($1)",
+      [ids]
+    );
+
+    const productIds = scansResult.rows
+      .map((r) => r.product_id)
+      .filter(Boolean);
+
+    const deleteScans = await pool.query(
       "DELETE FROM scans WHERE id = ANY($1) RETURNING *",
       [ids]
     );
+
+    if (productIds.length > 0) {
+      await pool.query("DELETE FROM products WHERE id = ANY($1)", [productIds]);
+    }
+
     res.json({
       success: true,
-      deleted: result.rows,
-      count: result.rows.length,
+      message: "Сканирования и связанные продукты удалены",
+      deletedScans: deleteScans.rows.length,
+      deletedProducts: productIds.length,
     });
   } catch (err) {
     console.error("Ошибка при массовом удалении сканирований:", err);
