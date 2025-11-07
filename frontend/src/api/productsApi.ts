@@ -36,4 +36,9 @@ export const productsApi = {
     const response = await axios.get<Scan>(`${API_BASE_URL}/scans/${id}`);
     return response.data;
   },
+
+  getAllProducts: async () => {
+    const response = await axios.get(`${API_BASE_URL}/products`);
+    return response.data;
+  },
 };
